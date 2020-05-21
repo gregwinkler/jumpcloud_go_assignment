@@ -1,0 +1,480 @@
+{
+	"info": {
+		"_postman_id": "32b030a2-edcc-4171-956a-5fff35a0a883",
+		"name": "Greg's JumpCloud examples and tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Greg's Message",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c8302b51-9909-4ad5-9737-80d6a71a639c",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Contains my message\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.msg).to.eql(\"Hello, this is the index page of Greg Winkler's coding assignment in Go\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Hash - immediate response",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "56d21bf7-31a2-4931-b3bd-3fb7e759b122",
+						"exec": [
+							"pm.test(\"Body matches string\", function () {\r",
+							"    var index = parseInt(pm.response.text(), 10);\r",
+							"\r",
+							"    pm.expect(index ).to.be.gte(1);\r",
+							"    // save that value so I can make sure it's still there in 5 seconds\r",
+							"    // during runs\r",
+							"    pm.environment.set(\"lastIndex\", index);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "password",
+							"value": "angryMonkey",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/hash",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"hash"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Hash  - no password - expect error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c6262674-fd3f-4dc9-b955-2ee2153557f7",
+						"exec": [
+							"pm.test(\"Status code is 422\", function () {\r",
+							"    pm.response.to.have.status(422);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/hash",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"hash"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET to Hash endpoint - expect 405 error - can't GET /hash",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "be7c5919-ea17-4476-8abf-93c55f38c697",
+						"exec": [
+							"pm.test(\"Status code is 405\", function () {\r",
+							"    pm.response.to.have.status(405);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/hash",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"hash"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET Hash - get last hashed password immediately returns empty",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3940a7ed-20d4-4bbb-9e3d-f06381756fdf",
+						"exec": [
+							"pm.test(\"Body is empty after 2 seconds\", function () {\r",
+							"    pm.expect(pm.response.text()).to.eql(\"\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d36ce62e-ecb5-4b78-9d22-4de28e7f1bbc",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "password",
+							"value": "angryMonkey",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/hash/{{lastIndex}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"hash",
+						"{{lastIndex}}"
+					]
+				},
+				"description": "If the collection is run, this will get the latest hash id, and wait two seconds to ask for it. In two seconds, it should not have been hashed. Expect empty string"
+			},
+			"response": []
+		},
+		{
+			"name": "GET Hash - get last hashed password after 5 seconds",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "83949763-4c30-421f-ab3f-e257572514c9",
+						"exec": [
+							"pm.test(\"Id is hashed after 5 seconds\", function () {\r",
+							"    pm.expect(pm.response.text()).to.not.eql(\"\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "b5280b2f-5e69-4492-9a02-07b3f11f8656",
+						"exec": [
+							"function pausecomp(millis) {\r",
+							"  var date = new Date();\r",
+							"  var curDate = null;\r",
+							"  do { curDate = new Date(); }\r",
+							"  while (curDate - date < millis);\r",
+							"}\r",
+							"\r",
+							"// wait at least 5 seconds and expect a result\r",
+							"pausecomp(5000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "password",
+							"value": "angryMonkey",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/hash/{{lastIndex}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"hash",
+						"{{lastIndex}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET stats - assume you have run at least one hash",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "249c2729-8f45-4084-b1be-ec28f0c4f14c",
+						"exec": [
+							"pm.test(\"Validate num and duration\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.total).to.be.gte(1);\r",
+							"    pm.expect(jsonData.average).to.be.gte(5000); // assuming I'm timing the whole hashing process, including delay\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "104c68e5-7f16-4fa5-9976-5ec56c80cdda",
+						"exec": [
+							"function pausecomp(millis) {\r",
+							"  var date = new Date();\r",
+							"  var curDate = null;\r",
+							"  do { curDate = new Date(); }\r",
+							"  while (curDate - date < millis);\r",
+							"}\r",
+							"\r",
+							"// wait at least 5 seconds and expect a result\r",
+							"pausecomp(5000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "password",
+							"value": "angryMonkey",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/stats",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"stats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Shutdown - all other requests from here should return 503",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "893bc62b-be47-477c-9577-434dda7f0a7c",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "06b0acea-7ffd-4106-812c-9d61047bda41",
+						"exec": [
+							"function pausecomp(millis) {\r",
+							"  var date = new Date();\r",
+							"  var curDate = null;\r",
+							"  do { curDate = new Date(); }\r",
+							"  while (curDate - date < millis);\r",
+							"}\r",
+							"\r",
+							"// wait at least 5 seconds and expect a result\r",
+							"pausecomp(5000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "password",
+							"value": "angryMonkey",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/shutdown",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"shutdown"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Hash after shutdown - expect 503",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f4c070cc-f0b0-4da7-bba7-2dd9ba3f6dfa",
+						"exec": [
+							"pm.test(\"Status code is 503\", function () {\r",
+							"    pm.response.to.have.status(503);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "password",
+							"value": "angryMonkey",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/hash",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"hash"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "0e9a3464-4bc0-4cad-83a8-d4d78b62e0e1",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "63220a74-746f-4e63-9744-b9bc88a2b764",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
